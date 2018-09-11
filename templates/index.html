@@ -1,0 +1,86 @@
+<html>
+  <head><title>Parsing Terms and Conditions</title>
+  </head>
+  <body>
+    Hey we got to the index page!!!
+    <form id="dataToParse">
+      <textarea name="pageData" id="pageData" form="dataToParse" rows="10" cols="30">Enter text here...</textarea>
+      <button type="button" onclick="parse()">ADD</button>
+    </form>
+    <br ><br >
+    <div>
+      Give me a URL<br>
+      <form id= "receiveImage">
+        <input type="text" name="url" id="imgurl"></input>
+        <button type="button" onclick="urlAnalyze()">SUBMIT</button>
+      </form>
+    </div>
+</body>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+<script>
+  var urlAnalyze = function(){
+  var $data = document.getElementById("imgurl").value;
+  console.log($data);
+  function post(path, params, method) {
+        method = method || "post"; // Set method to post by default if not specified.
+    
+        // The rest of this code assumes you are not using a library.
+        // It can be made less wordy if you use one.
+        var form = document.createElement("form");
+        form.setAttribute("method", method);
+        form.setAttribute("action", path);
+    
+        for(var key in params) {
+            if(params.hasOwnProperty(key)) {
+                var hiddenField = document.createElement("input");
+                hiddenField.setAttribute("type", "hidden");
+                hiddenField.setAttribute("name", key);
+                hiddenField.setAttribute("value", params[key]);
+    
+                form.appendChild(hiddenField);
+             }
+        }
+    
+        document.body.appendChild(form);
+        form.submit();
+    }
+  console.log($data);
+  post('http://127.0.0.1:3000/imageProcess/', {pageData: $data});
+
+  }
+
+  
+  var parse = function(){
+  var $data =  document.getElementById("pageData").value;
+  
+  console.log($data);
+
+function post(path, params, method) {
+        method = method || "post"; // Set method to post by default if not specified.
+    
+        // The rest of this code assumes you are not using a library.
+        // It can be made less wordy if you use one.
+        var form = document.createElement("form");
+        form.setAttribute("method", method);
+        form.setAttribute("action", path);
+    
+        for(var key in params) {
+            if(params.hasOwnProperty(key)) {
+                var hiddenField = document.createElement("input");
+                hiddenField.setAttribute("type", "hidden");
+                hiddenField.setAttribute("name", key);
+                hiddenField.setAttribute("value", params[key]);
+    
+                form.appendChild(hiddenField);
+             }
+        }
+    
+        document.body.appendChild(form);
+        form.submit();
+    }
+  console.log($data);
+  post('http://127.0.0.1:3000/parseHere/', {pageData: $data});
+}
+
+</script>
+</html>
