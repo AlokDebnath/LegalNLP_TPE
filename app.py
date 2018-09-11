@@ -27,9 +27,10 @@ def parse():
 @app.route('/imageProcess/', methods = ['POST'])
 def imgProc():
     url = request.form["pageData"]
-    urllib.request.urlretrieve(url, "./temp.jpg")
-    subprocess.call(["gocr", "./temp.jpg", "-o", "file"])
-    f = open('file', 'r')
+    urllib.request.urlretrieve(url, "./temp")
+
+    subprocess.call(["tesseract", "./temp", "out"])
+    f = open('out.txt', 'r')
     return parsify(f.read())
 
 
