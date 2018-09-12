@@ -32,7 +32,7 @@ def imgProc():
     urllib.request.urlretrieve(url, "./temp")
     try:
         subprocess.call(["tesseract", "./temp", "out"])
-        time.sleep(4)
+        time.sleep(9)
     except:
         print("Give better file please")
     f = open('out.txt', 'r')
@@ -40,8 +40,8 @@ def imgProc():
 
 
 def parsify(text):
-    return summarizer(text) 
-
+    k = summarizer(text)
+    return k
 
 
 
