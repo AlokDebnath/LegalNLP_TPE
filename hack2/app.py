@@ -1,16 +1,29 @@
+from nltk.corpus import stopwords
 import os
+from werkzeug import secure_filename
 import sys
 import json
 import pickle
 from tqdm import tqdm
-from nltk.corpus import stopwords
-import nltk
 import operator
 import numpy as np
 import pandas as pd
 import gensim
 from gensim.test.utils import common_texts, get_tmpfile
 from gensim.models import Word2Vec
+import time
+import urllib.request
+from flask import Flask, render_template, redirect, jsonify, request
+from flask_cors import CORS
+import subprocess
+import sys
+import re
+from wit import Wit
+
+
+app = Flask(__name__)
+app.config['SECRET_KEY'] = 'e5ac358c-f0bf-11e5-9e39-d3b532c10a28'
+
 
 
 # Intializing the Word2Vec Model, download the file from https://nlp.stanford.edu/projects/glove/
@@ -224,25 +237,47 @@ def rank_sentences_and_make_summary(sentences, processed_sentences, sentence_gra
 
 #### Main Program which calls the above defined functions
 
+def process(file_path, summary_length):
+    text = load_data(file_path)
+    
+    list_of_sentences, sentence_metadata = get_sentences_with_metadata(text)
+    list_of_sentences = [sentence.strip() for sentence in list_of_sentences if len(sentence) > 1]
+    
+    processed_sentences = make_processed_sentences(list_of_sentences)
+    
+    sentence_graph, sentence_common_graph = make_graph(processed_sentences, sentence_metadata)
+    
+    sentence_scores = calculate_scores(sentence_graph)
+    
+    sentence_page_scores = calculate_pagerank_scores(sentence_common_graph)
+    
+    sentence_score_final = [sentence_scores[i] * (sentence_page_scores[i]+1)  for i in range(len(sentence_scores))]
+    
+    summary = rank_sentences_and_make_summary(list_of_sentences, processed_sentences, sentence_graph, sentence_score_final, summary_length)
+    return summary
 
-file_path = "sample.txt"
-summary_length = 5
 
-text = load_data(file_path)
 
-list_of_sentences, sentence_metadata = get_sentences_with_metadata(text)
-list_of_sentences = [sentence.strip() for sentence in list_of_sentences if len(sentence) > 1]
 
-processed_sentences = make_processed_sentences(list_of_sentences)
+### App handing of the user interactions
 
-sentence_graph, sentence_common_graph = make_graph(processed_sentences, sentence_metadata)
+@app.route('/')
+def index():
+    return render_template('index.html')
 
-sentence_scores = calculate_scores(sentence_graph)
+@app.route('/upload/', methods = ['GET', 'POST'])
+def upload_text():
+    if request.method == 'POST':
+        file = request.files['file']
+        upload_dir = './'
+        filename = secure_filename(file.filename)
+        file.save(os.path.join(upload_dir, filename))
+        summary = process(filename, 5)
+        print(summary)
+    return render_template('display.html', sentences=summary) 
 
-sentence_page_scores = calculate_pagerank_scores(sentence_common_graph)
 
-sentence_score_final = [sentence_scores[i] * (sentence_page_scores[i]+1)  for i in range(len(sentence_scores))]
 
-summary = rank_sentences_and_make_summary(list_of_sentences, processed_sentences, sentence_graph, sentence_score_final, summary_length)
-summary
 
+if __name__ == '__main__':
+    app.run(debug=True)
